@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100">
+  <div class="bg-gray-100"> 
     <div>
       <div class="mx-6">
         <div class="bg-yellow-100 rounded-b text-yellow-900 px-4 py-3 shadow-md" role="alert">
@@ -21,10 +21,18 @@
           </div>
         </div>
       </div>
+    
+      <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative w-3/6 m-auto mt-3" role="alert" v-bind:class="{ hidden: metamaskInstalled }">
+        <strong class="font-bold">Warning!</strong>
+        <span class="block sm:inline">&nbsp;&nbsp;&nbsp;&nbsp;MetaMask was not installed in your computer.</span>
+        <span class="absolute top-0 bottom-0 right-0 px-4 py-3" @click="metamaskInstalled=true">
+          <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+        </span>
+      </div>
 
       <!-- Metamask and Walletconnect buttons -->
       <div class="text-right p-6 space-x-4">
-        <button type="button"
+        <button type="button" 
                 class="whitespace-nowrap inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/ethereum.svg">
           <span class="hidden lg:block">Chain ID&nbsp;</span> <strong>1</strong>
@@ -35,7 +43,7 @@
           </svg>
         </button>
 
-        <button type="button"
+        <button type="button" @click="connectMetaMask"
                 class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/metamask.svg">
           <span class="hidden lg:block">Connect with&nbsp;</span>MetaMask
@@ -97,13 +105,7 @@
           <input type="text" id="address" readonly value="0x0012901290190190190190"
                  class="p-4 h-16 sm:text-lg md:text-3xl text-gray-600 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-12 border-gray-300 rounded-md">
           <div class="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
-            <kbd class="inline-flex items-center  px-4 text-3xl text-gray-600" @click="copyToClipboard()">
-              <i class="fas fa-copy"></i>
-            </kbd>
-            <kbd class="inline-flex items-center  px-4 text-3xl text-gray-600" @click="qr = !qr"
-                 :aria-expanded="qr ? 'true' : 'false'" :class="{ 'active': qr }">
-              <i class="fas fa-qrcode"></i>
-            </kbd>
+            
           </div>
         </div>
 
@@ -380,16 +382,24 @@
         </div>
       </div>
     </footer>
+    <modal />
 
   </div>
 </template>
 
 <script>
+import Web3 from "web3";
 export default {
   name: 'Tokensale',
+  
   computed: {
     web3 () {
       return this.$store.state.web3
+    }
+  },
+  data(){
+    return {
+       metamaskInstalled:true
     }
   },
   props: {
@@ -397,8 +407,21 @@ export default {
     countdown: countdown,
     copyToClipboard: copyToClipboard,
 
+  },
+  methods:{
+    connectMetaMask: function() {
+      if (typeof window.ethereum == 'undefined') {
+        this.metamaskInstalled = false;
+      }else {
+        let web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
+        console.log(typeof window.ethereum);
+        console.log(web3);
+        console.log(web3.eth);
+      }
+    }
   }
 }
+
 
 function countdown() {
   return {
@@ -455,35 +478,3 @@ function copyToClipboard() {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.shim-red {
-  position: relative;
-  overflow: hidden;
-  background-color: rgba(255, 0, 0, 0.7);
-}
-
-.shim-red::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background-image: linear-gradient(
-      90deg,
-      rgba(233, 233, 233, 1) 0,
-      rgba(233, 233, 233, 0.9) 50%,
-      rgba(233, 233, 233, 0.8) 100%
-  );
-  animation: shimmer 3s ease-out infinite;
-  content: "";
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(0%);
-    opacity: 0;
-  }
-}
-</style>
