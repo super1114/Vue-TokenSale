@@ -414,6 +414,8 @@ export default {
       if (typeof window.ethereum == 'undefined') {
         this.metamaskInstalled = false;
       }else {
+        this.$store.dispatch("registerWeb3")
+        console.log(this.$store.web3)
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const account = accounts[0];
         let params = [
@@ -434,7 +436,6 @@ export default {
             console.log(error)
           });
         }
-        
     }
   }
 }
