@@ -1,5 +1,6 @@
 <template>
   <div class="bg-gray-100"> 
+    
     <div>
       <div class="mx-6">
         <div class="bg-yellow-100 rounded-b text-yellow-900 px-4 py-3 shadow-md" role="alert">
@@ -382,16 +383,14 @@
         </div>
       </div>
     </footer>
-    <modal />
-
   </div>
 </template>
 
 <script>
 import Web3 from "web3";
+
 export default {
   name: 'Tokensale',
-  
   computed: {
     web3 () {
       return this.$store.state.web3
@@ -399,7 +398,8 @@ export default {
   },
   data(){
     return {
-       metamaskInstalled:true
+       metamaskInstalled:true,
+       metaMaskShow:false
     }
   },
   props: {
@@ -409,15 +409,39 @@ export default {
 
   },
   methods:{
-    connectMetaMask: function() {
+    connectMetaMask: async function() {
       if (typeof window.ethereum == 'undefined') {
         this.metamaskInstalled = false;
       }else {
+        this.metaMaskShow = true;
+        window.ethereum.on('notification', function(payload) {
+          console.log(payload);
+        });
+        
         let web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
-        console.log(typeof window.ethereum);
-        console.log(web3);
-        console.log(web3.eth);
-      }
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const account = accounts[0];
+        let params = [
+          {
+            from: account,
+            to: '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
+          },
+        ];
+
+        await window.ethereum
+          .request({
+            method: 'eth_sendTransaction',
+            params,
+          })
+          .then((result) => {
+            console.log(result)
+          })
+          .catch((error) => {
+            console.log(error)
+          });
+          console.log(web3);
+        }
+        
     }
   }
 }

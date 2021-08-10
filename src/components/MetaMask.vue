@@ -10,6 +10,7 @@
 
 <script>
     import VueMetamask from 'vue-metamask';
+    console.log("fffffffffffffffffssssssssssssss");
     export default {
         components: {
             VueMetamask,

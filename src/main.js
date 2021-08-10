@@ -5,15 +5,15 @@ import App from './App.vue'
 import './assets/tailwind.css'
 
 import VueQRCodeComponent from 'vue-qrcode-component'
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+/*(import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
+*/
 Vue.config.productionTip = false
 Vue.component('qr-code', VueQRCodeComponent)
 
-Vue.use(BootstrapVue)
-Vue.use(IconsPlugin)
+//Vue.use(BootstrapVue)
+//Vue.use(IconsPlugin)
 
 new Vue({
   render: h => h(App),
