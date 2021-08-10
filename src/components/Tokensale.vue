@@ -414,10 +414,6 @@ export default {
         this.metamaskInstalled = false;
       }else {
         this.metaMaskShow = true;
-        window.ethereum.on('notification', function(payload) {
-          console.log(payload);
-        });
-        
         let web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const account = accounts[0];
