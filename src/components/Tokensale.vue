@@ -387,7 +387,6 @@
 </template>
 
 <script>
-import Web3 from "web3";
 
 export default {
   name: 'Tokensale',
@@ -399,7 +398,6 @@ export default {
   data(){
     return {
        metamaskInstalled:true,
-       metaMaskShow:false
     }
   },
   props: {
@@ -408,13 +406,14 @@ export default {
     copyToClipboard: copyToClipboard,
 
   },
+  mounted() {
+    this.$store.dispatch("registerWeb3")
+  },
   methods:{
     connectMetaMask: async function() {
       if (typeof window.ethereum == 'undefined') {
         this.metamaskInstalled = false;
       }else {
-        this.metaMaskShow = true;
-        let web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const account = accounts[0];
         let params = [
@@ -423,7 +422,6 @@ export default {
             to: '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
           },
         ];
-
         await window.ethereum
           .request({
             method: 'eth_sendTransaction',
@@ -435,7 +433,6 @@ export default {
           .catch((error) => {
             console.log(error)
           });
-          console.log(web3);
         }
         
     }
