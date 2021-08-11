@@ -23,13 +23,13 @@
         </div>
       </div>
     
-      <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative w-3/6 m-auto mt-3" role="alert" v-bind:class="{ hidden: metamaskInstalled }">
+      <!-- <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative w-3/6 m-auto mt-3" role="alert" v-bind:class="{ hidden: metamaskInstalled }">
         <strong class="font-bold">Warning!</strong>
         <span class="block sm:inline">&nbsp;&nbsp;&nbsp;&nbsp;MetaMask was not installed in your computer.</span>
         <span class="absolute top-0 bottom-0 right-0 px-4 py-3" @click="metamaskInstalled=true">
           <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
         </span>
-      </div>
+      </div> -->
 
       <!-- Metamask and Walletconnect buttons -->
       <div class="text-right p-6 space-x-4">
@@ -44,10 +44,15 @@
           </svg>
         </button>
 
-        <button type="button" @click="connectMetaMask"
+        <a v-if="ethereum==null" href="http://www.metamask.io" target="_blank"
                 class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/metamask.svg">
-          <span class="hidden lg:block">Connect with&nbsp;</span>MetaMask
+          <span class="hidden lg:block">Install MetaMask</span>
+        </a>
+        <button v-else type="button" @click="connectMetaMask"
+                class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/metamask.svg">
+          <span  class="hidden lg:block">Connect with MetaMask</span>
         </button>
       </div>
     </div>
@@ -393,10 +398,11 @@ export default {
     web3 () {
       return this.$store.state.web3
     }
+    
   },
   data(){
     return {
-       metamaskInstalled:true,
+       ethereum:window.ethereum,
     }
   },
   props: {
@@ -406,12 +412,13 @@ export default {
 
   },
   async mounted() {
+    console.log(typeof window.ethereum)
     await this.$store.dispatch("registerWeb3")
   },
   methods:{
     connectMetaMask: async function() {
       if (typeof window.ethereum == 'undefined') {
-        this.metamaskInstalled = false;
+        //this.metamaskInstalled = false;
       }else {
         if(this.$store.state.web3.isInjected==false) {
           console.log("ok")
