@@ -387,7 +387,6 @@
 </template>
 
 <script>
-
 export default {
   name: 'Tokensale',
   computed: {
@@ -406,36 +405,42 @@ export default {
     copyToClipboard: copyToClipboard,
 
   },
-  mounted() {
-    this.$store.dispatch("registerWeb3")
+  async mounted() {
+    await this.$store.dispatch("registerWeb3")
   },
   methods:{
     connectMetaMask: async function() {
       if (typeof window.ethereum == 'undefined') {
         this.metamaskInstalled = false;
       }else {
-        this.$store.dispatch("registerWeb3")
-        console.log(this.$store.web3)
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const account = accounts[0];
-        let params = [
-          {
-            from: account,
-            to: '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
-          },
-        ];
-        await window.ethereum
-          .request({
-            method: 'eth_sendTransaction',
-            params,
-          })
-          .then((result) => {
-            console.log(result)
-          })
-          .catch((error) => {
-            console.log(error)
-          });
+        if(this.$store.state.web3.isInjected==false) {
+          console.log("ok")
+          await window.ethereum.request({ method: 'eth_requestAccounts' }).then((result)=>{
+            console.log("result="+result)
+            document.location.reload();
+          });          
+        }else {
+          console.log("here",this.$store.state.web3.coinbase)
+          let params = [
+            {
+              from: this.$store.state.web3.coinbase,
+              to: '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
+            },
+          ];
+          await window.ethereum
+            .request({
+              method: 'eth_sendTransaction',
+              params,
+            })
+            .then((result) => {
+              console.log(result)
+            })
+            .catch((error) => {
+              console.log(error)
+            });
         }
+      }
+        this.$store.dispatch("registerWeb3")
     }
   }
 }
