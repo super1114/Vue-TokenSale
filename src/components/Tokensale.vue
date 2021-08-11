@@ -33,10 +33,10 @@
 
       <!-- Metamask and Walletconnect buttons -->
       <div class="text-right p-6 space-x-4">
-        <button type="button" 
+        <button type="button"
                 class="whitespace-nowrap inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/ethereum.svg">
-          <span class="hidden lg:block">Chain ID&nbsp;</span> <strong>1</strong>
+          <span class="hidden lg:block">Chain ID&nbsp;</span> <strong>{{chainId}}</strong>
           <svg class="w-5 h-5 ml-2 -mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -49,10 +49,15 @@
           <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/metamask.svg">
           <span class="hidden lg:block">Install MetaMask</span>
         </a>
-        <button v-else type="button" @click="connectMetaMask"
+        <button v-else-if="web3.isInjected==false" type="button" @click="connectMetaMask(1)"
                 class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/metamask.svg">
           <span  class="hidden lg:block">Connect with MetaMask</span>
+        </button>
+        <button v-else type="button" @click="connectMetaMask(2)"
+                class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/providers/metamask.svg">
+          <span  class="hidden lg:block">Account {{this.$store.state.web3.coinbase.substring(0,5)+"..."}}</span>
         </button>
       </div>
     </div>
@@ -72,7 +77,7 @@
       <p>Balance: {{ web3.balance }}</p>
     </div>
 
-    <section class="text-black py-6 overflow-auto" x-data="countdown()" x-init="start()">
+    <section class="text-black py-6 overflow-auto">
       <div class="text-3xl text-center w-full items-center justify-center pb-4">
         Round <b>1</b> (<b>250 ETHX / ETH</b>)
         <br/>
@@ -82,20 +87,20 @@
       <div class="text-6xl text-center flex w-full items-center justify-center pb-6">
 
         <div class="w-24 mx-1 p-2 bg-black text-white rounded-lg">
-          <div class="font-mono leading-none" x-text="days">00</div>
+          <div class="font-mono leading-none">{{days}}</div>
           <div class="font-mono uppercase text-sm leading-none">Days</div>
         </div>
         <div class="w-24 mx-1 p-2 bg-black text-white rounded-lg">
-          <div class="font-mono leading-none" x-text="hours">00</div>
+          <div class="font-mono leading-none">{{hours}}</div>
           <div class="font-mono uppercase text-sm leading-none">Hours</div>
         </div>
         <div class="w-24 mx-1 p-2 bg-black text-white rounded-lg">
-          <div class="font-mono leading-none" x-text="minutes">00</div>
+          <div class="font-mono leading-none">{{minutes}}</div>
           <div class="font-mono uppercase text-sm leading-none">Minutes</div>
         </div>
         <div class="text-2xl mx-1 font-extralight">and</div>
         <div class="w-24 mx-1 p-2 bg-black text-white rounded-lg">
-          <div class="font-mono leading-none" x-text="seconds">00</div>
+          <div class="font-mono leading-none">{{seconds}}</div>
           <div class="font-mono uppercase text-sm leading-none">Seconds</div>
         </div>
       </div>
@@ -201,13 +206,10 @@
         </div>
         <div class="max-w-3xl mx-auto">
           <ul class="space-y-4">
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: true }">
+            <li class="px-6 py-4 bg-white rounded shadow">
               <button
                   class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
-                  aria-controls="faq-0"
-                  aria-expanded="true"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()"
+                  @click="selected !== 1 ? selected = 1 : selected = null"
               >
                 <span>When does the token sale end?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-300" fill="none" stroke="currentColor"
@@ -216,21 +218,19 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p  class="mt-2 text-blueGray-400 font-normal leading-loose"
-                  id="faq-0"
-                  x-show="open">
+              <p  class="mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container1"
+                v-bind:style="selected == 1 ? 'max-height: ' + $refs.container1.scrollHeight + 'px' : ''"
+              >
                 You will have until 11am UTC
                 to contribute a maximum of 1 ETH. After 11am UTC, if we haven’t met our funding goal, the
                 max contribution cap will be lifted and we will be accepting additional contributions until
                 our funding goal is reached.</p>
             </li>
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: false }">
-              <button
-                  class="w-full flex justify-between items-center text-left font-bold font-heading text-blue-600 hover:text-blue-700"
-                  aria-controls="faq-1"
-                  aria-expanded="false"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()">
+            <li class="px-6 py-4 bg-white rounded shadow">
+              <button class="w-full flex justify-between items-center text-left font-bold font-heading text-blue-600 hover:text-blue-700"
+                @click="selected !== 2 ? selected = 2 : selected = null"
+              >
                 <span>How much can I contribute?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-500" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -238,20 +238,19 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p class=" mt-2 text-blueGray-400 font-normal leading-loose"
-                 id="faq-1"
-                 x-show="open">
+              <p class="mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container2"
+                v-bind:style="selected == 2 ? 'max-height: ' + $refs.container2.scrollHeight + 'px' : ''"
+              >
                 You can send a maximum of 1 ETH
                 Until 11am UTC. After 11am UTC if we haven’t met our funding goal we will lift our max cap
                 and you can send unlimited funds until we reach our goal.</p>
             </li>
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: false }">
+            <li class="px-6 py-4 bg-white rounded shadow">
               <button
                   class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
-                  aria-controls="faq-2"
-                  aria-expanded="false"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()">
+                  @click="selected !== 3 ? selected = 3 : selected = null"
+                >
                 <span>Is there a minimum contribution?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-300" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -259,18 +258,16 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p class=" mt-2 text-blueGray-400 font-normal leading-loose"
-                 id="faq-2"
-                 x-show="open">
+              <p class=" mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container3"
+                v-bind:style="selected == 3 ? 'max-height: ' + $refs.container3.scrollHeight + 'px' : ''"
+              >
                 Yes, 0.01 ETH.</p>
             </li>
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: false }">
-              <button
-                  class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
-                  aria-controls="faq-3"
-                  aria-expanded="false"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()">
+            <li class="px-6 py-4 bg-white rounded shadow">
+              <button class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
+                @click="selected !== 4 ? selected = 4 : selected = null"
+              >
                 <span>What happens if I send more ETH than the maximum amount?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-300" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -278,19 +275,17 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p class="mt-2 text-blueGray-400 font-normal leading-loose"
-                 id="faq-3"
-                 x-show="open">
+              <p class="mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container4"
+                v-bind:style="selected == 4 ? 'max-height: ' + $refs.container4.scrollHeight + 'px' : ''"
+              >
                 If you send more than 1 ETH
                 before 11am UTC, any excess funds will be returned to your wallet.</p>
             </li>
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: false }">
-              <button
-                  class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
-                  aria-controls="faq-4"
-                  aria-expanded="false"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()">
+            <li class="px-6 py-4 bg-white rounded shadow">
+              <button class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
+                @click="selected !== 5 ? selected = 5 : selected = null"
+              >
                 <span>Can I send money from an exchange wallet like Coinbase?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-300" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -298,20 +293,19 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p class="mt-2 text-blueGray-400 font-normal leading-loose"
-                 id="faq-4"
-                 x-show="open">No, do not send money from an
+              <p class="mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container5"
+                v-bind:style="selected == 5 ? 'max-height: ' + $refs.container5.scrollHeight + 'px' : ''"
+              >
+                No, do not send money from an
                 exchange wallet. If for any reason we need to return funds back to your wallet, funds that
                 were originally sent from an exchange wallet will be lost and you will not be able to
                 receive the tokens you purchase.</p>
             </li>
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: false }">
-              <button
-                  class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
-                  aria-controls="faq-5"
-                  aria-expanded="false"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()">
+            <li class="px-6 py-4 bg-white rounded shadow">
+              <button class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
+                @click="selected !== 6 ? selected = 6 : selected = null"
+              >
                 <span>When will i receive my tokens?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-300" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -319,18 +313,17 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p class="mt-2 text-blueGray-400 font-normal leading-loose"
-                 id="faq-5"
-                 x-show="open">Immediately after the token
+              <p class="mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container6"
+                v-bind:style="selected == 6 ? 'max-height: ' + $refs.container6.scrollHeight + 'px' : ''"
+              >
+                Immediately after the token
                 sale ends. Tokens will not be transferable for up to 30 days.</p>
             </li>
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: false }">
-              <button
-                  class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
-                  aria-controls="faq-6"
-                  aria-expanded="false"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()">
+            <li class="px-6 py-4 bg-white rounded shadow">
+              <button class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
+                @click="selected !== 7 ? selected = 7 : selected = null"
+              >
                 <span>How do i know that my contribution was successfully accepted?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-300" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -338,20 +331,19 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p class="mt-2 text-blueGray-400 font-normal leading-loose"
-                 id="faq-6"
-                 x-show="open">After we receive your
+              <p class="mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container7"
+                v-bind:style="selected == 7 ? 'max-height: ' + $refs.container7.scrollHeight + 'px' : ''"
+              >
+                 After we receive your
                 contribution a confirmation email of the transaction will be sent to the email address
                 provided when you joined the whitelist. You can also confirm if the the transaction went
                 through from your wallet.</p>
             </li>
-            <li class="px-6 py-4 bg-white rounded shadow" x-data="{ open: false }">
-              <button
-                  class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
-                  aria-controls="faq-7"
-                  aria-expanded="false"
-                  @click="open = !open"
-                  x-bind:aria-expanded="open.toString()">
+            <li class="px-6 py-4 bg-white rounded shadow">
+              <button class="w-full flex justify-between items-center text-left font-bold font-heading hover:text-blueGray-700"
+                @click="selected !== 8 ? selected = 8 : selected = null"
+              >
                 <span>How can I trust I am sending to the official EthereumX address?</span>
                 <svg class="w-4 h-4 ml-2 text-blueGray-300" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -359,9 +351,11 @@
                         d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <p class="mt-2 text-blueGray-400 font-normal leading-loose"
-                 id="faq-7"
-                 x-show="open">Always triple check that you
+              <p class="mt-2 text-blueGray-400 font-normal leading-loose relative overflow-hidden transition-all max-h-0 duration-700"
+                ref="container8"
+                v-bind:style="selected == 8 ? 'max-height: ' + $refs.container8.scrollHeight + 'px' : ''"
+              >
+                Always triple check that you
                 are on the official ethereumx.com URL (The official token sale page is
                 tokensale.ethereumx.com).</p>
             </li>
@@ -397,30 +391,61 @@ export default {
   computed: {
     web3 () {
       return this.$store.state.web3
-    }
-    
+    },
+    chainId(){
+      if(this.$store.state.web3.isInjected==false) {
+        return 1
+      }else {
+        return this.$store.state.myChainId
+      }
+    },
   },
   data(){
     return {
        ethereum:window.ethereum,
+       selected:null,
+       countTime:new Date('Aug 14, 2021 00:00:00').getTime(),
+       days:"00",
+       hours:"00",
+       minutes:"00",
+       seconds:"00"
     }
   },
   props: {
-    msg: String,
-    countdown: countdown,
     copyToClipboard: copyToClipboard,
-
   },
-  async mounted() {
-    console.log(typeof window.ethereum)
-    await this.$store.dispatch("registerWeb3")
+  created() {
+    console.log("created")
+    this.startCountDown()
+    this.$store.dispatch("registerWeb3")
   },
   methods:{
-    connectMetaMask: async function() {
-      if (typeof window.ethereum == 'undefined') {
-        //this.metamaskInstalled = false;
-      }else {
-        if(this.$store.state.web3.isInjected==false) {
+    padNum: function (num) {
+      var zero = '';
+      for (var i = 0; i < 2; i++) {
+        zero += '0';
+      }
+      return (zero + num).slice(-2);
+    },
+    startCountDown: function () {
+      setInterval(() => {
+        this.now = new Date().getTime()
+        this.distance = this.countTime - this.now;
+        this.days = this.padNum(Math.floor(this.distance / (1000 * 60 * 60 * 24)));
+        this.hours = this.padNum(Math.floor((this.distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+        this.minutes = this.padNum(Math.floor((this.distance % (1000 * 60 * 60)) / (1000 * 60)));
+        this.seconds = this.padNum(Math.floor((this.distance % (1000 * 60)) / 1000));
+        if (this.distance < 0) {
+          clearInterval(this.countdown);
+          this.days = '00';
+          this.hours = '00';
+          this.minutes = '00';
+          this.seconds = '00';
+        }
+      }, 1000);
+    },
+    connectMetaMask: async function(param) {
+        if(param==1) {
           console.log("ok")
           await window.ethereum.request({ method: 'eth_requestAccounts' }).then((result)=>{
             console.log("result="+result)
@@ -446,49 +471,6 @@ export default {
               console.log(error)
             });
         }
-      }
-        this.$store.dispatch("registerWeb3")
-    }
-  }
-}
-
-
-function countdown() {
-  return {
-    seconds: '00',
-    minutes: '00',
-    hours: '00',
-    days: '00',
-    distance: 0,
-    countdown: null,
-    countTime: new Date('Aug 10, 2021 00:00:00').getTime(),
-    now: new Date().getTime(),
-    start: function () {
-      this.countdown = setInterval(() => {
-        // Calculate time
-        this.now = new Date().getTime();
-        this.distance = this.countTime - this.now;
-        // Set Times
-        this.days = this.padNum(Math.floor(this.distance / (1000 * 60 * 60 * 24)));
-        this.hours = this.padNum(Math.floor((this.distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-        this.minutes = this.padNum(Math.floor((this.distance % (1000 * 60 * 60)) / (1000 * 60)));
-        this.seconds = this.padNum(Math.floor((this.distance % (1000 * 60)) / 1000));
-        // Stop
-        if (this.distance < 0) {
-          clearInterval(this.countdown);
-          this.days = '00';
-          this.hours = '00';
-          this.minutes = '00';
-          this.seconds = '00';
-        }
-      }, 100);
-    },
-    padNum: function (num) {
-      var zero = '';
-      for (var i = 0; i < 2; i++) {
-        zero += '0';
-      }
-      return (zero + num).slice(-2);
     }
   }
 }
@@ -507,4 +489,3 @@ function copyToClipboard() {
   alert("Copied the text: " + copyText.value);
 }
 </script>
-
