@@ -468,21 +468,24 @@ export default {
         this.account = result[0];
       })
       window.ethereum.on('networkChanged', (networkId)=>{
+        
         this.networkId = networkId;
         if(networkId==1){
           this.contractAddr="0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";
         }else if(networkId==56){
           this.contractAddr="0x0AaFB655636890a1683c1b5cCFAbD12Efd839D09";
+        }else if(networkId==3){
+          this.web3Obj = new Web3(Web3.givenProvider || 'https://ropsten.infura.io/'),
+          this.contractAddr="0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";
         }else {
-          this.contractAddr="0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";
+          this.web3Obj = new Web3(Web3.givenProvider || 'https://ropsten.infura.io/'),
+          this.contractAddr="0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";
         }
+        this.getBalance();
       });
       window.ethereum.on('accountsChanged', async (accounts) =>{
         this.account = accounts[0];
-        await this.web3Obj.eth.getBalance(this.account).then((bal)=>{
-          this.balance = bal;
-        });
-        console.log(this.balance);
+        this.getBalance();
       });
     }
     
@@ -491,11 +494,18 @@ export default {
     this.web3Obj.eth.net.getId().then((result)=>{
       this.networkId = result;
       if(result==56) this.contractAddr = "0x0AaFB655636890a1683c1b5cCFAbD12Efd839D09";//Bsc
-      else if(result==1) this.contractAddr = "0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";//Ether
-      else this.contractAddr = "0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";//Ether
+      else if(result==1) this.contractAddr = "0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";//Main net
+      else if(result==3) this.contractAddr = "0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";//Reposten network.
+      else this.contractAddr = "0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";//Other.
+      this.getBalance();
     });
   },
   methods:{
+    getBalance() {
+      this.web3Obj.eth.getBalance(this.account).then((result)=>{
+        this.balance = Web3.utils.fromWei(result, 'ether');
+      })
+    },
     showAlert:function(msg) {
       this.alertShow=true;
       this.alertMsg=msg;
@@ -505,24 +515,20 @@ export default {
       },1000)
     },
     buyToken:function() {
-      console.log(this.networkId);
-      console.log(this.contractAddr);
-      // let balance = this.balance;
-      // if(this.sendAmount<=0){
-      //   return;
-      // }
-      // if(this.sendAmount>balance){
-      //   this.showAlert("Insufficient funds");
-      //   return;
-      // }
+      if(this.sendAmount<=0){
+        return;
+      }
+      if(this.sendAmount>this.balance){
+        this.showAlert("Insufficient funds");
+        return;
+      }
+      console.log(this.account);
       window.contract = new this.web3Obj.eth.Contract(this.abi, this.contractAddr);
-      console.log(window.contract);
-      window.contract.methods.buy().estimateGas().then((result)=> {
-        console.log(result);
-        window.contract.methods.buy().send({from:this.$store.state.web3.coinbase, gas:result,value:this.recvAmount}).then((res)=>{
+      
+        window.contract.methods.buy().send({from:this.account, gas:5000000,gasPrice:'20000000000',value:Web3.utils.toWei(this.sendAmount, "ether")}).then((res)=>{
           console.log(res);
         })
-      }); 
+      
     },
     copyAddress:function() {
       var copyText = document.getElementById("address");
