@@ -144,13 +144,13 @@
           </div>
         </div>
       </div>
-      <div v-else class="m-auto d-flex lg:w-2/6 bg-white p-4 rounded .shadow-2xl">
+      <div v-else-if="!is_paused" class="m-auto d-flex lg:w-2/6 bg-white p-4 rounded .shadow-2xl">
         <h2 class="block mb-4 px-6 font-bold text-left text-black">
           Deposit below to purchase ETHX
         </h2>
         <div class="mt-10 flex flex-row justify-between px-6">
           <h6 class="text-sm">Send</h6>
-          <h6 class="text-sm">Balance:{{this.$store.state.web3.balance}}</h6>
+          <h6 class="text-sm">Balance:{{this.balance}}</h6>
         </div>
         <div class="mt-2 flex flex-row items-center justify-between mb-6 px-6">
           <input class="appearance-none font-medium text-2xl py-1 rounded w-full  mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="0.0" v-model="sendAmount">
@@ -170,6 +170,25 @@
           @click="buyToken"
         >
           BUY
+        </button>
+      </div>
+      <div v-else-if="is_paused" class="m-auto d-flex lg:w-2/6 bg-white p-4 rounded .shadow-2xl">
+        <h2 class="block mb-4 px-6 font-bold text-left text-black">
+          Claim the purchased ETHX
+        </h2>
+        <div class="mt-10 flex flex-row justify-between px-6">
+          <h6 class="text-sm">Claimable Ethx</h6>
+          <h6 class="text-sm">Balance:{{this.ethxBalance}}</h6>
+        </div>
+        <div class="mt-2 flex flex-row items-center justify-between mb-6 px-6">
+          <input class="appearance-none font-medium text-2xl py-1 rounded w-full  mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="0.0" v-model="claimableAmount" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sc-jeCdPy acRau"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <label class="ml-2 font-semibold text-xl">ETHX</label>
+        </div>          
+        <button class="w-full bg-purple-600 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button"
+          @click="claimToken"
+        >
+          Claim
         </button>
       </div>
     </section>
@@ -437,16 +456,18 @@ export default {
       }
     },
     recvAmount(){
-      return this.sendAmount*200/3;
+      return this.sendAmount*this.price;
     }
   },
   data(){
     return {
       web3Obj : new Web3(Web3.givenProvider || 'ws://localhost:8546'),
+      contractObj : {},
+      price:0,
       sendAmount:0,
        ethereum:window.ethereum,
        selected:null,
-       countTime:new Date('Aug 20, 2021 00:00:00').getTime(),
+       countTime:new Date('Aug 30, 2021 00:00:00').getTime(),
        days:"00",
        hours:"00",
        minutes:"00",
@@ -458,7 +479,10 @@ export default {
        alertMsg:"",
        networkId:"1",
        account:"",
-       balance:0
+       balance:0,
+       is_paused:false,
+       ethxBalance:0,
+       claimableAmount:0
     }
   },
   
@@ -468,7 +492,6 @@ export default {
         this.account = result[0];
       })
       window.ethereum.on('networkChanged', (networkId)=>{
-        
         this.networkId = networkId;
         if(networkId==1){
           this.contractAddr="0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";
@@ -476,16 +499,19 @@ export default {
           this.contractAddr="0x0AaFB655636890a1683c1b5cCFAbD12Efd839D09";
         }else if(networkId==3){
           this.web3Obj = new Web3(Web3.givenProvider || 'https://ropsten.infura.io/'),
-          this.contractAddr="0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";
+          this.contractAddr="0x5444b0d07Ef839cCEa4a81FBf999149a06f010fE";
         }else {
           this.web3Obj = new Web3(Web3.givenProvider || 'https://ropsten.infura.io/'),
           this.contractAddr="0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";
         }
         this.getBalance();
+        this.contractObj = new this.web3Obj.eth.Contract(this.abi,this.contractAddr);
+        this.calcPrice();
       });
       window.ethereum.on('accountsChanged', async (accounts) =>{
         this.account = accounts[0];
         this.getBalance();
+        this.calcPrice();
       });
     }
     
@@ -495,9 +521,11 @@ export default {
       this.networkId = result;
       if(result==56) this.contractAddr = "0x0AaFB655636890a1683c1b5cCFAbD12Efd839D09";//Bsc
       else if(result==1) this.contractAddr = "0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";//Main net
-      else if(result==3) this.contractAddr = "0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";//Reposten network.
+      else if(result==3) this.contractAddr = "0x5444b0d07Ef839cCEa4a81FBf999149a06f010fE";//Reposten network.
       else this.contractAddr = "0x5d6d95a53d0ddd47325af83474f9b40bfbc9653c";//Other.
       this.getBalance();
+      this.contractObj = new this.web3Obj.eth.Contract(this.abi,this.contractAddr);
+      this.calcPrice();
     });
   },
   methods:{
@@ -514,7 +542,29 @@ export default {
         this.alertShow = false;
       },1000)
     },
+    calcPrice:function() {
+      this.contractObj.methods.price().call().then((res)=>{
+        this.price = 1/(res/1000000000000000000);
+      })
+      this.contractObj.methods.paused().call().then((res)=>{
+        this.is_paused = res;
+      })
+      this.contractObj.methods.claimable(this.account).call().then((res)=>{
+        console.log(res);
+      })
+    },
+    claimToken:function() {
+      if(this.claimableAmount==0){
+        this.showAlert("nothing to claim");
+        return;
+      }
+      this.contractObj.methods.claim().send({from:this.account, gas:300000, type:"0x2"}).then((res)=>{
+        console.log(res);
+        document.location.reload();
+      })
+    },
     buyToken:function() {
+      console.log(Web3.utils.toWei(this.sendAmount, "ether"));
       if(this.sendAmount<=0){
         return;
       }
@@ -522,13 +572,12 @@ export default {
         this.showAlert("Insufficient funds");
         return;
       }
-      console.log(this.account);
+      console.log(Web3.utils.toWei(this.sendAmount, "ether"));
       window.contract = new this.web3Obj.eth.Contract(this.abi, this.contractAddr);
-      
-        window.contract.methods.buy().send({from:this.account, gas:5000000,gasPrice:'20000000000',value:Web3.utils.toWei(this.sendAmount, "ether")}).then((res)=>{
-          console.log(res);
-        })
-      
+      window.contract.methods.buy().send({from:this.account, gas:300000,value:Web3.utils.toWei(this.sendAmount, "ether"), type:"0x2"}).then((res)=>{
+        console.log(res);
+        document.location.reload();
+      })
     },
     copyAddress:function() {
       var copyText = document.getElementById("address");

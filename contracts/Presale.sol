@@ -444,7 +444,7 @@ contract ETHXPresale is Ownable {
         //solium-disable-next-line
         require(!paused, "presale is paused");
         require(msg.value >= minimum, "amount too small");
-        require(weiRaised.add(msg.value) < cap, "cap hit");
+        require(weiRaised.add(msg.value) < cap, "cap hit"); 
 
         uint256 amount = calculateAmountPurchased(msg.value);
         require(totalOwed.add(amount) <= ethx.balanceOf(address(this)), "sold out");
