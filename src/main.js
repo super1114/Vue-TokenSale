@@ -1,19 +1,16 @@
 import Vue from 'vue'
+import VueSocialSharing from 'vue-social-sharing'
 import router from './router'
 import { store } from './store'
 import App from './App.vue'
 import './assets/tailwind.css'
 
 import VueQRCodeComponent from 'vue-qrcode-component'
-/*(import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-*/
+
 Vue.config.productionTip = false
 Vue.component('qr-code', VueQRCodeComponent)
 
-//Vue.use(BootstrapVue)
-//Vue.use(IconsPlugin)
+Vue.use(VueSocialSharing)
 
 new Vue({
   render: h => h(App),

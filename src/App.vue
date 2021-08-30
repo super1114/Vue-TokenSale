@@ -1,16 +1,18 @@
 <template>
   <div id="app">
+    <SocialButtons />
     <Tokensale />
   </div>
 </template>
 
 <script>
-import Tokensale from './components/Tokensale.vue'
-
+import Tokensale from './components/Tokensale'
+import SocialButtons from "./components/SocialButtons"
 export default {
   name: 'App',
   components: {
-    Tokensale
+    Tokensale,
+    SocialButtons
   }
 }
 </script>
@@ -22,5 +24,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
+} 
 </style>

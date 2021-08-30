@@ -1,11 +1,6 @@
 <template>
     <section class="text-black py-6 overflow-auto">
-      <div class="text-3xl text-center w-full items-center justify-center pb-4">
-        Round <b>1</b> (<b>250 ETHX / ETH</b>)
-        <br/>
-        <br/>
-        <p class="text-xl text-gray-400">NEXT round (higher price) in&nbsp;</p>
-      </div>
+      
       <div class="text-6xl text-center flex w-full items-center justify-center pb-6">
 
         <div class="w-24 mx-1 p-2 bg-black text-white rounded-lg">
@@ -34,7 +29,7 @@ export default {
     name:"Countdown",
     data(){
         return{
-            countTime:new Date('Aug 30, 2021 00:00:00').getTime(),
+            countTime:new Date('Sep 05, 2021 00:00:00').getTime(),
             days:"00",
             hours:"00",
             minutes:"00",

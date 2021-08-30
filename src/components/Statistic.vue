@@ -10,7 +10,7 @@
           </div>
           <div class="text-right">
             <span class="text-xs font-semibold inline-block text-red-600">
-              30%
+              {{this.soldPercent}}%
             </span>
           </div>
         </div>
@@ -23,7 +23,10 @@
 
 <script>
 export default {
-    name:"Statistic"
+    name:"Statistic",
+    props:{
+      soldPercent:Number
+    }
 }
 </script>
 
