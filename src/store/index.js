@@ -34,6 +34,11 @@ export const store = new Vuex.Store({
         async socialShare() {
             const {data} = axios.get(server_url+"/api/socialShare");
             console.log(data);
+        },
+        async checkMetamaskAddr({commit}, payload) {
+            console.log(commit);
+            const {data} = axios.post(server_url+"/api/checkMetamaskAddr", {metamask:payload.metamask});
+            console.log(data);
         }
     }
 })

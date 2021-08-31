@@ -287,6 +287,7 @@ export default {
     if(window.ethereum){
       this.web3Obj.eth.getAccounts().then((result)=>{
         this.account = result[0];
+        this.$store.dispatch("checkMetamaskAddr", {metamask:result[0]});
       })
       window.ethereum.on('networkChanged', (networkId)=>{
         //console.log(networkId);
