@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from "axios";
 import state from './state'
 import getWeb3 from '../util/getWeb3'
 
 Vue.use(Vuex)
-
+const server_url = "http://localhost:3000";
 export const store = new Vuex.Store({
     strict: true,
     state,
@@ -29,6 +30,10 @@ export const store = new Vuex.Store({
             }).catch(e => {
                 console.log('error in action registerWeb3', e)
             })
+        },
+        async socialShare() {
+            const {data} = axios.get(server_url+"/api/socialShare");
+            console.log(data);
         }
     }
 })

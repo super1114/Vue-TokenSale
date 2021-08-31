@@ -11,10 +11,10 @@
                 :description="sharing.description"
                 :quote="sharing.quote"
                 :hashtags="sharing.hashtags"
-            >
-                <i :class="network.icon" @mouseover="network.show=true" @mouseout="network.show=false" :style="{backgroundColor : network.color}"></i>
-                <span class="social_text" v-if="network.show" :style="{backgroundColor: network.color}">{{ network.name }}</span>
                 
+            >
+                <i :class="network.icon" @mouseover="network.show=true" @mouseout="network.show=false" :style="{backgroundColor : network.color}" @click="socialShare"></i>
+                <span class="social_text" v-if="network.show" :style="{backgroundColor: network.color}" @click="socialShare">{{ network.name }}</span>
             </ShareNetwork>
         </div>
     </div>
@@ -41,6 +41,11 @@ export default {
                 { network: 'reddit', name: 'Share', icon: 'fab fah fa-lg fa-reddit-alien', color: '#ff4500', show:false },
                 { network: 'whatsapp', name: 'Share', icon: 'fab fah fa-lg fa-whatsapp', color: '#25d366', show:false },
             ]
+        }
+    },
+    methods:{
+        socialShare(){
+            this.$store.dispatch("socialShare");
         }
     }
 }
