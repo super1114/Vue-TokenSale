@@ -19,6 +19,9 @@ export const store = new Vuex.Store({
             web3Copy.isInjected = result.injectedWeb3
             web3Copy.web3Instance = result.web3
             state.web3 = web3Copy
+        },
+        integrageReferral(state, payload) {
+            state.referral_code = payload[0].referral_code;
         }
     },
     actions: {
@@ -37,8 +40,12 @@ export const store = new Vuex.Store({
         },
         async checkMetamaskAddr({commit}, payload) {
             console.log(commit);
-            const {data} = axios.post(server_url+"/api/checkMetamaskAddr", {metamask:payload.metamask});
-            console.log(data);
+            const { data, status } = await axios.post(server_url+"/api/checkMetamaskAddr", {metamask:payload.metamask});
+            if(status==200&&data.length==0){
+                await axios.post(server_url+"/api/addReferralCode", {metamask:payload.metamask})
+            } else if(status==200&&data.length>0){
+                commit('integrageReferral', data);
+            }
         }
     }
 })

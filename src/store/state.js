@@ -8,6 +8,7 @@ let state = {
         error: null
     },
     contractInstance: null,
-    myChainId : 96
+    myChainId : 96,
+    referral_code:''
 }
 export default state

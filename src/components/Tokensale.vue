@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100">     
+  <div class="bg-gray-100">
     <div class="relative">
       <Toptext />
       <transition name="fade">
@@ -8,8 +8,13 @@
         </div>
       </transition>
       <!-- Metamask and Walletconnect buttons -->
-      <div class="text-right p-6 space-x-4">
-        
+      <div class="text-right p-6 space-x-4 flex justify-end">
+        <button type="button"
+                class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-purple-700 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                style="height:38px"
+                >
+          <span  class="lg:block">{{ parseInt(this.claimableAmount)+parseInt(this.ethxBalance) }} ETHX</span>
+        </button>
         <div class="relative inline-block text-left">
           <div>
             <button type="button"
@@ -41,7 +46,7 @@
                 >
                 <img class="-ml-0.5 mr-2 h-4 w-4" src="../assets/img/icons/bnb.png">
                 <span class="lg:block"><strong>BSC Mainnet</strong></span>
-                
+
               </button>
               <button type="button"
                 v-else
@@ -81,7 +86,7 @@
       </div>
     </section>
 
-    <div class='metamask-info'>
+    <div class='metamask-info hidden'>
       <p>Metamask: {{ web3.isInjected!==null }}</p>
       <p>Network: {{ this.networkId }}</p>
       <p>Account: {{ this.account }}</p>
@@ -114,14 +119,14 @@
                 </div>
             </div>
             </div>
-            
+
           </div>
 
           <div x-show="qr" class="flex justify-center max-w-6xl bg-white shadow-lg rounded-lg p-8 mx-auto text-center">
-            <qr-code text="address"></qr-code>
+            <qr-code :text="account"></qr-code>
           </div>
         </div>
-        <div class="max-w-6xl mx-auto pt-6 pb-6 overflow-auto text-white">
+        <div class="max-w-6xl mx-auto pt-6 pb-6 overflow-auto text-white" >
           <div class="float-left">
             Max contribution: 100 ETH
             <br/>
@@ -130,7 +135,7 @@
           <div class="float-right">
             Gas limit: 200,000 UNITS
             <br/>
-            Gas price: 6 GWEI
+            Gas price: 80 GWEI
           </div>
         </div>
       </div>
@@ -140,7 +145,7 @@
         </h2>
         <div class="mt-10 flex flex-row justify-between px-6">
           <h6 class="text-sm">Send</h6>
-          <h6 class="text-sm">Balance:{{this.balance}}</h6>
+          <h6 class="text-sm">Balance: {{this.balance}}</h6>
         </div>
         <div class="mt-2 flex flex-row items-center justify-between mb-6 px-6">
           <input class="appearance-none font-medium text-2xl py-1 rounded w-full  mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="0.0" v-model="sendAmount">
@@ -150,13 +155,14 @@
         </div>
         <div class="mt-10 flex flex-row justify-between px-6">
           <h6 class="text-sm">Receive</h6>
-          <h6 class="text-sm">Balance:0</h6>
+          <h6 class="text-sm">Balance:{{parseInt(this.claimableAmount)+parseInt(this.ethxBalance)}}</h6>
         </div>
         <div class="mt-2 flex flex-row items-center justify-between mb-6 px-6">
           <input class="appearance-none font-medium text-2xl py-1 rounded w-full  mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="0.0" v-model="recvAmount">
-          <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sc-jeCdPy acRau"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <img src="../assets/img/ethereumx-black.svg" height="20px" width="20px" />
           <label class="ml-2 font-semibold text-xl">ETHX</label>
-        </div>          
+
+        </div>
         <button class="w-full bg-purple-600 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button"
           @click="buyToken" v-bind:disabled="sendAmount<=0"
         >
@@ -169,13 +175,13 @@
         </h2>
         <div class="mt-10 flex flex-row justify-between px-6">
           <h6 class="text-sm">Claimable Ethx</h6>
-          <h6 class="text-sm">Balance:{{this.ethxBalance}}</h6>
+          <h6 class="text-sm">Balance:{{this.claimableAmount}}</h6>
         </div>
         <div class="mt-2 flex flex-row items-center justify-between mb-6 px-6">
           <input class="appearance-none font-medium text-2xl py-1 rounded w-full  mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="0.0" v-model="claimableAmount" disabled>
-          <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sc-jeCdPy acRau"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <img src="../assets/img/ethereumx-black.svg" height="20px" width="20px" />
           <label class="ml-2 font-semibold text-xl">ETHX</label>
-        </div>    
+        </div>
         <button class="w-full bg-purple-600 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button"
           @click="claimToken"
         >
@@ -184,10 +190,10 @@
       </div>
       <div v-else class="m-auto d-flex lg:w-2/6 bg-white p-4 rounded .shadow-2xl">
         <h2 class="block mb-4 px-6 font-bold text-left text-black">
-          Tokensale is only available on the networks:
+          Tokensale is only available on these networks:
         </h2>
-        <h4 class="text-md text-left px-6">-Ethereum(mainnet)</h4>
-        <h4 class="text-md text-left px-6 mt-4">-Binance Smart Chain(mainnet)</h4>    
+        <h4 class="text-md text-left px-6">-Ethereum (Mainnet)</h4>
+        <h4 class="text-md text-left px-6 mt-4">-Binance Smart Chain (Mainnet)</h4>
         <button class="w-full bg-purple-600 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-6" type="button"
           @click="switchNetwork('0x1')"
         >
@@ -202,7 +208,7 @@
           <div>
             <span
                 class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">
-              {{this.soldAmount}}ETHX SOLD
+              {{this.soldAmount}} ETHX SOLD
             </span>
           </div>
           <div class="text-right">
@@ -216,10 +222,10 @@
         </div>
       </div>
     </section>
-    
+
     <Faq />
     <Footer />
-    
+
   </div>
 </template>
 
@@ -259,7 +265,7 @@ export default {
   },
   data(){
     return {
-      web3Obj : new Web3(Web3.givenProvider || 'ws://localhost:8546'),
+      web3Obj : new Web3(Web3.givenProvider || 'ws://localhost:8545'),
       contractObj : {},
       price:0,
       sendAmount:0,
@@ -270,7 +276,7 @@ export default {
       alertShow:false,
       alertMsg:"",
       networkId:"1",
-      account:"",
+      account:"0x78Ce09cF3AFF8Ca7cF8B111725f547e18aF74875",
       balance:0,
       is_paused:false,
       ethxBalance:0,
@@ -281,17 +287,16 @@ export default {
       soldAmount:0
     }
   },
-  
+
   created() {
     console.log("created")
     if(window.ethereum){
       this.web3Obj.eth.getAccounts().then((result)=>{
         this.account = result[0];
-        this.$store.dispatch("checkMetamaskAddr", {metamask:result[0]});
+        //this.$store.dispatch("checkMetamaskAddr", {metamask:result[0]});
       })
       window.ethereum.on('networkChanged', (networkId)=>{
-        //console.log(networkId);
-        this.networkChanged(networkId);        
+        this.networkChanged(networkId);
       });
       window.ethereum.on('accountsChanged', async (accounts) =>{
         this.account = accounts[0];
@@ -299,7 +304,7 @@ export default {
         this.calcPrice();
       });
     }
-    
+
     this.web3Obj.eth.net.getId().then((result)=>{
       this.networkChanged(result)
     });
@@ -316,7 +321,7 @@ export default {
       this.dropdownShow = false;
       this.networkId = networkId;
       if(networkId==1){
-        this.web3Obj = new Web3(Web3.givenProvider || 'ws://localhost:8546');
+        this.web3Obj = new Web3(Web3.givenProvider || 'ws://localhost:8545');
         this.contractAddr="0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";
         this.curCoin = { sym:"ETH", icon:"../assets/img/icons/icon.png" };
       } else if(networkId==3){
@@ -336,7 +341,7 @@ export default {
       this.contractObj = new this.web3Obj.eth.Contract(this.abi,this.contractAddr);
       this.calcPrice();
     },
-    
+
     async getBalance() {
       await this.web3Obj.eth.getBalance(this.account).then((result)=>{
         console.log(result)
@@ -352,7 +357,6 @@ export default {
       },1000)
     },
     calcPrice: async function() {
-      
       await this.contractObj.methods.price().call().then((res)=>{
         this.price = 1/(res/1000000000000000000);
       })
@@ -360,7 +364,7 @@ export default {
         this.is_paused = res;
       })
       await this.contractObj.methods.claimable(this.account).call().then((res)=>{
-        console.log(res);
+        this.claimableAmount = res;
       })
       await this.contractObj.methods.weiRaised().call().then((res)=>{
         this.soldAmount = res*this.price/1000000000000000000;
@@ -395,14 +399,14 @@ export default {
       var copyText = document.getElementById("address");
       copyText.select();
       copyText.setSelectionRange(0, 99999);
-      document.execCommand("copy");   
+      document.execCommand("copy");
       document.getSelection().removeAllRanges();
       this.copiedTooltip = true;
       setTimeout(() => {
         this.copiedTooltip=false;
       }, 1000);
     },
-    
+
     connectMetaMask: async function(param) {
         if(param==1) {
           console.log("ok")
@@ -415,7 +419,7 @@ export default {
           let params = [
             {
               from: this.$store.state.web3.coinbase,
-              to: '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
+              to: '0x78Ce09cF3AFF8Ca7cF8B111725f547e18aF74875',
             },
           ];
           await window.ethereum

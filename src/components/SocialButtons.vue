@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div class="z-50 md:z-50 sm:z-50">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
-        <div class="share-network-list">
+        <div class="share-network-list z-50 md:z-50 sm:z-50">
             <ShareNetwork
                 v-for="network in networks"
                 :network="network.network"
