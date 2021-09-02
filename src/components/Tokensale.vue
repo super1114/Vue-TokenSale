@@ -12,8 +12,9 @@
         <button type="button"
                 class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-purple-700 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 style="height:38px"
+                @click="claimToken"
                 >
-          <span  class="lg:block">{{ parseInt(this.claimableAmount)+parseInt(this.ethxBalance) }} ETHX</span>
+          <span  class="lg:block">{{ parseInt(this.claimableAmount) }} ETHX</span>
         </button>
         <div class="relative inline-block text-left">
           <div>
@@ -155,7 +156,7 @@
         </div>
         <div class="mt-10 flex flex-row justify-between px-6">
           <h6 class="text-sm">Receive</h6>
-          <h6 class="text-sm">Balance:{{parseInt(this.claimableAmount)+parseInt(this.ethxBalance)}}</h6>
+          <h6 class="text-sm">Balance:{{parseInt(this.ethxBalance)}}</h6>
         </div>
         <div class="mt-2 flex flex-row items-center justify-between mb-6 px-6">
           <input class="appearance-none font-medium text-2xl py-1 rounded w-full  mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="0.0" v-model="recvAmount">
@@ -175,7 +176,7 @@
         </h2>
         <div class="mt-10 flex flex-row justify-between px-6">
           <h6 class="text-sm">Claimable Ethx</h6>
-          <h6 class="text-sm">Balance:{{this.claimableAmount}}</h6>
+          <h6 class="text-sm">Balance:{{this.ethxBalance}}</h6>
         </div>
         <div class="mt-2 flex flex-row items-center justify-between mb-6 px-6">
           <input class="appearance-none font-medium text-2xl py-1 rounded w-full  mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="0.0" v-model="claimableAmount" disabled>
@@ -232,6 +233,7 @@
 <script>
 import Web3 from "web3"
 import PresaleJson from "../../contracts/Presale.json"
+import EthxJson from "../../contracts/Ethx.json"
 import Footer from "./Footer"
 import Faq from "./Faq"
 //import Statistic from "./Statistic"
@@ -259,20 +261,29 @@ export default {
         return this.$store.state.myChainId
       }
     },
-    recvAmount(){
-      return this.sendAmount*this.price;
+    recvAmount:{
+      get(){
+        return this.sendAmount*this.price;  
+      },
+      set(newVal){
+        this.sendAmount = newVal/this.price;
+      }
+      
     }
   },
   data(){
     return {
       web3Obj : new Web3(Web3.givenProvider || 'ws://localhost:8545'),
       contractObj : {},
+      ethxContractObj : {},
       price:0,
       sendAmount:0,
       ethereum:window.ethereum,
       copiedTooltip:false,
       contractAddr:"",
+      ethxContractAddr:"",
       abi:PresaleJson.abi,
+      ethxAbi:EthxJson.abi,
       alertShow:false,
       alertMsg:"",
       networkId:"1",
@@ -323,30 +334,38 @@ export default {
       if(networkId==1){
         this.web3Obj = new Web3(Web3.givenProvider || 'ws://localhost:8545');
         this.contractAddr="0x76f65b431784ed58aab24fb645b21ee2fcfee7ea";
+        this.ethxContractAddr="0x14af5133C9989a7965CDe4fF82d391F96c8F6921";
         this.curCoin = { sym:"ETH", icon:"../assets/img/icons/icon.png" };
       } else if(networkId==3){
         this.web3Obj = new Web3(Web3.givenProvider || 'https://ropsten.infura.io/');
         this.contractAddr="0x5444b0d07Ef839cCEa4a81FBf999149a06f010fE";
+        this.ethxContractAddr="0x961af03e0065170eaab464c151944fb774ee5003";
         this.curCoin = { sym:"ETH", icon:"../assets/img/icons/icon.png" };
       } else if(networkId==56){
         this.web3Obj = new Web3(Web3.givenProvider || 'https://bsc-dataseed.binance.org');
         this.contractAddr="0x0AaFB655636890a1683c1b5cCFAbD12Efd839D09";
+        this.ethxContractAddr="0xca221Ff18e38213a0ff185A3fA9C7807aff677BB";
         this.curCoin = { sym:"BNB", icon:"../assets/img/icons/bnb.png" };
       } else {
         this.web3Obj = new Web3(Web3.givenProvider || 'https://ropsten.infura.io/');
         this.contractAddr="0x5444b0d07Ef839cCEa4a81FBf999149a06f010fE";
+        this.ethxContractAddr="0x961af03e0065170eaab464c151944fb774ee5003";
         this.curCoin = { sym:"ETH", icon:"../assets/img/icons/icon.png" };
       }
+      this.ethxContractObj = new this.web3Obj.eth.Contract(this.ethxAbi,this.ethxContractAddr);
       this.getBalance();
       this.contractObj = new this.web3Obj.eth.Contract(this.abi,this.contractAddr);
+      
       this.calcPrice();
     },
 
     async getBalance() {
       await this.web3Obj.eth.getBalance(this.account).then((result)=>{
-        console.log(result)
         this.balance = Web3.utils.fromWei(result, 'ether');
-      })
+      });
+      this.ethxContractObj.methods.balanceOf(this.account).call().then((result)=> {
+        this.ethxBalance = result;
+      });
     },
     showAlert:function(msg) {
       this.alertShow=true;
@@ -369,7 +388,6 @@ export default {
       await this.contractObj.methods.weiRaised().call().then((res)=>{
         this.soldAmount = res*this.price/1000000000000000000;
         this.soldPercent = Math.round((res*this.price*100/250000000000000000000000)*10000)/10000;
-        console.log(this.soldPercent)
       })
     },
     claimToken: async function() {
